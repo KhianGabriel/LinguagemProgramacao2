@@ -8,61 +8,61 @@ public class Paciente implements Serializable {
     private String cpf;
     private char sexo;
     private String dataDeNascimento;
-    private String orgão;
+    private String orgao;
     private LocalDateTime horarioDeEnfileiramento;
     private LocalDateTime horarioDesenfileiramento;
     private static final long serialVersionUID = 5775164107894522754l;
 
-    public Paciente(String nome, String cpf, char sexo, String dataDeNascimento, String orgão) {
+    protected Paciente(String nome, String cpf, char sexo, String dataDeNascimento, String orgao) {
         this.nome = nome;
         this.cpf = cpf;
         this.sexo = sexo;
         this.dataDeNascimento = dataDeNascimento;
-        this.orgão = orgão;
+        this.orgao = orgao;
         horarioDeEnfileiramento = LocalDateTime.now();
     }
 
-    public String getNome() {
+    protected String getNome() {
         return nome;
     }
 
-    public void setNome(String nome) {
+    protected void setNome(String nome) {
         this.nome = nome;
     }
 
-    public String getCpf() {
+    protected String getCpf() {
         return cpf;
     }
 
-    public void setCpf(String cpf) {
+    protected void setCpf(String cpf) {
         this.cpf = cpf;
     }
 
-    public char getSexo() {
+    protected char getSexo() {
         return sexo;
     }
 
-    public void setSexo(char sexo) {
+    protected void setSexo(char sexo) {
         this.sexo = sexo;
     }
 
-    public String getDataDeNascimento() {
+    protected String getDataDeNascimento() {
         return dataDeNascimento;
     }
 
-    public void setDataDeNascimento(String dataDeNascimento) {
+    protected void setDataDeNascimento(String dataDeNascimento) {
         this.dataDeNascimento = dataDeNascimento;
     }
 
-    public String getOrgão() {
-        return orgão;
+    protected String getOrgao() {
+        return orgao;
     }
 
-    public void setOrgão(String orgão) {
-        this.orgão = orgão;
+    protected void setOrgao(String orgao) {
+        this.orgao = orgao;
     }
 
-    public String tempoDePermanencia(LocalDateTime horarioDesenfileiramento) {
+    protected String tempoDePermanencia(LocalDateTime horarioDesenfileiramento) {
 
         horarioDesenfileiramento = LocalDateTime.now();
         
@@ -74,12 +74,30 @@ public class Paciente implements Serializable {
 
         return String.format(" %d dias, %d horas, %d minutos", dias, horas, minutos);
     }
+    
+    protected LocalDateTime getHorarioDeEnfileiramento() {
+        return horarioDeEnfileiramento;
+    }
 
+    // protected void setHorarioDeEnfileiramento(LocalDateTime horarioDeEnfileiramento) {
+    //     this.horarioDeEnfileiramento = horarioDeEnfileiramento;
+    // }
+
+    // protected void setHorarioDesenfileiramento(LocalDateTime horarioDesenfileiramento) {
+    //     this.horarioDesenfileiramento = horarioDesenfileiramento;
+    // }
 
     @Override
     public String toString() {
-        return "Paciente [nome= " + nome + ", cpf= " + cpf + ", sexo= " + sexo + ", dataDeNascimento= " + dataDeNascimento
-                + ", orgão= " + orgão + ", Tempo de permanencia na fila = " + tempoDePermanencia(horarioDesenfileiramento) + "]";
+        
+        return String.format("Paciente:%n" +
+                             "Nome: %s%n" +
+                             "CPF: %s%n" +
+                             "Sexo: %c%n" +
+                             "Data de Nascimento: %s%n" +
+                             "Órgão: %s%n" +
+                             "Data e Hora de Inclusão: %s%n",
+                             nome, cpf, sexo, dataDeNascimento, orgao, tempoDePermanencia(horarioDesenfileiramento));
     }
 
 }
