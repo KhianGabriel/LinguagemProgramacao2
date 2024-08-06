@@ -5,6 +5,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayDeque;
 import java.util.Date;
 import java.util.Queue;
@@ -26,19 +28,41 @@ public class PacienteUtil {
         do {
             menu();
 
-            System.out.print("Digite a opção : ");
+            System.out.print("Digite a opção: ");
+            while (!scanner.hasNextInt()) {
+                System.out.println("Entrada inválida. Digite um número inteiro.");
+                scanner.next();
+                menu();
+                System.out.println("Digite a opção: ");;
+            }
             op = scanner.nextInt();
             scanner.nextLine();
 
             switch (op) {
                 case 1:
-                    cadastrarPaciente();
+                    try {
+                        cadastrarPaciente();
+                    } catch (ParseException e) {
+                        System.out.println("Erro na formatação da data.");
+                    }
+                    
                     break;
                 case 2:
-                    System.out.println(chamarPaciente());
+                    Paciente paciente = chamarPaciente();
+                    if (paciente != null) {
+                        System.out.println(paciente);
+                    } else {
+                        System.out.println("Nenhum paciente na fila.");
+                    }
+                    
                     break;
                 case 3:
-                    System.out.println(consultarDadosPaciente());
+                    Paciente proximoPaciente = consultarDadosPaciente();
+                    if (proximoPaciente != null) {
+                        System.out.println(proximoPaciente);
+                    } else {
+                        System.out.println("Nenhum paciente na fila.");
+                    }
                     break;
                 case 4:
                     qtdPacientesEmEspera();
@@ -50,8 +74,10 @@ public class PacienteUtil {
                     qtdPacientesTempoMedioEspera();
                     break;
                 case 0:
-                    System.out.println("Encerrando aplicação");
+                    encerrarAplicacao();
                     break;
+                default:
+                    System.out.println("Opção inválida, digite a opção correta.");
             }
 
         } while (op != 0);
@@ -80,24 +106,43 @@ public class PacienteUtil {
             }
         } while (!valorValido);
 
-        System.out.println("Digite o sexo do paciente 'M' ou 'F' : ");
-        char sexo = scanner.next().charAt(0);
-        System.out.println("Digite o dia de nascimento do paciente : ");
-        int dia = scanner.nextInt();
-        System.out.println("Digite o mês de nascimento do paciente : ");
-        int mes = scanner.nextInt();
-        System.out.println("Digite o ano de nascimento do paciente : ");
-        int ano = scanner.nextInt();
-        scanner.nextLine();
+        char sexo;
+        while (true) {
+            System.out.println("Digite o sexo do paciente ('M' ou 'F'):");
+            sexo = scanner.next().toUpperCase().charAt(0);
+            scanner.nextLine();
+            if (sexo == 'M' || sexo == 'F') {
+                break;
+            }
+            System.out.println("Sexo inválido. Tente novamente.");
+        }
+
+        int dia, mes, ano;
+        while (true) {
+            System.out.println("Digite o dia de nascimento do paciente : ");
+            dia = scanner.nextInt();
+            System.out.println("Digite o mês de nascimento do paciente : ");
+            mes = scanner.nextInt();
+            System.out.println("Digite o ano de nascimento do paciente : ");
+            ano = scanner.nextInt();
+            scanner.nextLine();
+
+            if (dia > 0 && dia <= 31 && mes > 0 && mes <= 12 && ano > 1900) {
+                break;
+            }
+
+            System.out.println("Data inválida. Tente novamente.");
+        }
+       
         String orgao;
         do {
             System.out.println("Qual orgão vai ser transplantado ? Coracao - Rim - Pulmao - Figado ");
             orgao = scanner.nextLine();
 
-            if (validaOrgao(orgao) == true) {
+            if (validaOrgao(orgao)) {
                 break;
             } else {
-                System.out.println("Nome invalido");
+                System.out.println("Órgão inválido. Tente novamente.");
             }
 
         } while (!valorValido);
@@ -119,6 +164,10 @@ public class PacienteUtil {
     }
 
     private static void qtdPacientesEmEspera() {
+        if (filaDePacientes.isEmpty()) {
+            System.out.println("Nenhum paciente na fila.");
+            return;
+        }
 
         int contCoracao = 0;
         int contRim = 0;
@@ -127,7 +176,7 @@ public class PacienteUtil {
 
         for (Paciente paciente : filaDePacientes) {
 
-            switch (paciente.getOrgão()) {
+            switch (paciente.getOrgao()) {
                 case "Coracao":
                     contCoracao++;
                     break;
@@ -150,6 +199,10 @@ public class PacienteUtil {
     }
 
     private static void qtdPacientesEmEsperaPorPercentual() {
+        if (filaDePacientes.isEmpty()) {
+            System.out.println("Nenhum paciente na fila.");
+            return;
+        }
         int contCoracao = 0;
         int contRim = 0;
         int contPulmao = 0;
@@ -157,7 +210,7 @@ public class PacienteUtil {
 
         for (Paciente paciente : filaDePacientes) {
 
-            switch (paciente.getOrgão()) {
+            switch (paciente.getOrgao()) {
                 case "Coracao":
                     contCoracao++;
                     break;
@@ -187,7 +240,33 @@ public class PacienteUtil {
     }
 
     private static void qtdPacientesTempoMedioEspera() {
-        // Falta implementar codigo
+        if (filaDePacientes.isEmpty()) {
+            System.out.println("Nenhum paciente na fila.");
+            return;
+        }
+    
+        long totalDias = 0;
+        long totalHoras = 0;
+        long totalMinutos = 0;
+        int numPacientes = filaDePacientes.size();
+    
+        for (Paciente paciente : filaDePacientes) {
+            Duration duracao = Duration.between(paciente.getHorarioDeEnfileiramento(), LocalDateTime.now());
+            totalDias += duracao.toDays();
+            totalHoras += duracao.toHours() % 24;
+            totalMinutos += duracao.toMinutes() % 60;
+        }
+    
+        totalHoras += totalMinutos / 60;
+        totalMinutos = totalMinutos % 60;
+        totalDias += totalHoras / 24;
+        totalHoras = totalHoras % 24;
+    
+        long mediaDias = totalDias / numPacientes;
+        long mediaHoras = totalHoras / numPacientes;
+        long mediaMinutos = totalMinutos / numPacientes;
+    
+        System.out.println("Tempo médio de permanência na fila: " + mediaDias + " dias, " + mediaHoras + " horas, " + mediaMinutos + " minutos.");
     }
 
     public static void menu() {
@@ -276,4 +355,11 @@ public class PacienteUtil {
             e.printStackTrace();
         }
     }
+
+    public static void encerrarAplicacao() {
+        System.out.println("Encerrando aplicação");
+        escreverArquivo();
+        System.exit(0);
+    }
+
 }
