@@ -187,7 +187,7 @@ public class PacienteUtil {
     }
 
     private static void qtdPacientesTempoMedioEspera() {
-        //Falta implementar codigo
+        // Falta implementar codigo
     }
 
     public static void menu() {
